@@ -9,7 +9,7 @@ namespace Adrian_Hernandez_Bonilla_P1_Ap1.Context
         {
             
             var optionsBuilder = new DbContextOptionsBuilder<Contexto>();
-            optionsBuilder.UseSqlServer("");
+            optionsBuilder.UseSqlServer("workstation id=RegistroDb.mssql.somee.com;packet size=4096;user id=ahb45_SQLLogin_1;pwd=59868mjt41;data source=RegistroDb.mssql.somee.com;persist security info=False;initial catalog=RegistroDb;TrustServerCertificate=True");
 
             return new Contexto(optionsBuilder.Options);
         }
