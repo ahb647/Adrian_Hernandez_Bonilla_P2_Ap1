@@ -1,0 +1,115 @@
+﻿@page "/Encuestas/DeleteEncuestas/{EncuestaId:int}"
+@rendermode InteractiveServer
+@inject EncuestasServices encuestasService
+@inject CiudadesServices ciudadesService
+@inject NavigationManager navigation
+
+<PageTitle>Eliminar Encuesta</PageTitle>
+
+<div class="container">
+    <div class="card shadow-lg">
+        <div class="card-header text-center">
+            <h5 class="card-title">Eliminar Encuesta</h5>
+        </div>
+
+        <div class="card-body">
+            @if (Encuesta == null)
+            {
+                <div class="alert alert-warning" role="alert">
+                    Cargando encuesta...
+                </div>
+            }
+            else
+            {
+               
+                <div class="mb-3">
+                    <label for="Fecha" class="form-label"><strong>Fecha</strong></label>
+                    <InputDate class="form-control" @bind-Value="Encuesta.Fecha" readonly></InputDate>
+                </div>
+
+              
+                <div class="mb-3">
+                    <label for="Asignatura" class="form-label"><strong>Asignatura</strong></label>
+                    <InputText class="form-control" @bind-Value="Encuesta.Asignatura" readonly></InputText>
+                </div>
+
+              
+                <div class="mb-3">
+                    <label for="Monto" class="form-label"><strong>Monto</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Encuesta.Monto" readonly></InputNumber>
+                </div>
+
+               
+                <div class="border border-success p-3 mt-3">
+                    <h4>Detalles de Ciudades</h4>
+                    <div>
+                        <table class="table table-light">
+                            <thead class="table-striped">
+                                <tr class="text-center">
+                                    <th>Ciudad</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detalle in Encuesta.encuestasDetalle)
+                                {
+                                    <tr class="text-center">
+                                        <td>@detalle.CiudadId</td>
+                                        <td>@detalle.Monto.ToString("C")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="card-footer text-center mt-2">
+            <a href="/Encuestas/IndexEncuestas" class="btn btn-outline-primary bi bi-arrow-left mt-3">Volver</a>
+            <button type="button" class="btn btn-outline-danger bi bi-trash mt-3" @onclick="EliminarEncuesta">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int EncuestaId { get; set; }
+
+    public Encuestas Encuesta { get; set; } = new Encuestas();
+    public string MensajeError { get; set; } = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (EncuestaId > 0)
+        {
+          
+            Encuesta = await encuestasService.Buscar(EncuestaId);
+            if (Encuesta == null)
+            {
+                navigation.NavigateTo("/Encuestas/IndexEncuestas");
+            }
+        }
+        else
+        {
+            navigation.NavigateTo("/Encuestas/IndexEncuestas");
+        }
+    }
+
+    private async Task EliminarEncuesta()
+    {
+        if (EncuestaId > 0)
+        {
+            var eliminado = await encuestasService.Eliminar(EncuestaId);
+            if (eliminado)
+            {
+                await Task.Delay(1000);
+                navigation.NavigateTo("/Encuestas/IndexEncuestas");
+            }
+            else
+            {
+                MensajeError = "Error al eliminar la encuesta.";
+            }
+        }
+    }
+}
