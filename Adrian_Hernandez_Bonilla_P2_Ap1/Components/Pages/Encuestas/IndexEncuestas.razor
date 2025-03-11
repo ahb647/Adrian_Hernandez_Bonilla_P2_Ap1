@@ -3,9 +3,8 @@
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
+<PageTitle>Índice de Encuestas</PageTitle>
 
-
-<PageTitle></PageTitle>
 <div class="container">
     <div class="card shadow-lg">
         <div class="card-header">
@@ -13,60 +12,164 @@
         </div>
 
         <div class="card-body">
+          
+            <div class="row mb-3">
+              
+                <div class="col-md-3">
+                    <label for="metodoBusqueda" class="form-label"><strong>Método de Búsqueda</strong></label>
+                    <select class="form-select" @bind="MetodoBusqueda">
+                        <option value="ID">Buscar por ID</option>
+                        <option value="Asignatura">Buscar por Asignatura</option>
+                    </select>
+                </div>
 
-            <table class="table table-hover">
-                <thead class="text-center">
-                    <tr>
-                        <th><strong>Encuesta Id</strong></th>
-                        <th><strong>Fecha</strong></th>
-                        <th><strong>Asignatura</strong></th>
-                        <th><strong>Monto</strong></th>
-                        <th><strong>Editar</strong></th>
-                        <th><strong>Eliminar</strong></th>
-                    </tr>
-                </thead>
-                <tbody class="text-center">
-                    @foreach (var encuestas in encuestas)
+                <div class="col-md-3">
+                    <label for="inputBusqueda" class="form-label"><strong>Buscar</strong></label>
+                    @if (MetodoBusqueda == "ID")
                     {
-                        <tr>
-                            <td>@encuestas.EncuestaId</td>
-                            <td>@encuestas.Fecha</td>
-                            <td>@encuestas.Asignatura</td>
-                            <td>@encuestas.Monto</td>
-                            
-
-                            <td class="text-center">
-                                <a href="Edit/@encuestas.EncuestaId" class="btn btn-outline-primary bi bi-pencil-square"></a>
-                            </td>
-
-                            <td class="text-center">
-                                <a href="Delete/@@encuestas.EncuestaId" class="btn btn-outline-danger bi bi-trash"></a>
-                            </td>
-                        </tr>
-
+                        <InputNumber class="form-control" @bind-Value="BusquedaId" placeholder="Ingrese ID..." />
                     }
-                </tbody>
-            </table>
+                    else if (MetodoBusqueda == "Asignatura")
+                    {
+                        <InputText class="form-control" @bind-Value="BusquedaAsignatura" placeholder="Ingrese asignatura..." />
+                    }
+                </div>
+
+           
+                <div class="col-md-4">
+                    <label class="form-label"><strong>Filtrar por Fecha</strong></label>
+                    <div class="d-flex gap-2">
+                        <InputDate class="form-control" @bind-Value="FechaInicio" placeholder="Desde" />
+                        <InputDate class="form-control" @bind-Value="FechaFin" placeholder="Hasta" />
+                    </div>
+                </div>
+
+                <div class="col-md-1 d-flex align-items-end">
+                    <button class="btn btn-outline-primary w-100" @onclick="FiltrarEncuestas">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </div>
+
+                <div class="col-md-1 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" @onclick="RestablecerFiltros">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+                </div>
+            </div>
+
+           
+            @if (encuestasFiltradas.Count == 0)
+            {
+                <div class="alert alert-warning text-center" role="alert">
+                    No hay encuestas registradas con los filtros aplicados.
+                </div>
+            }
+            else
+            {
+              
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="text-center">
+                            <tr>
+                                <th><strong>ID</strong></th>
+                                <th><strong>Fecha</strong></th>
+                                <th><strong>Asignatura</strong></th>
+                                <th><strong>Monto</strong></th>
+                                <th><strong>Editar</strong></th>
+                                <th><strong>Eliminar</strong></th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-center">
+                            @foreach (var encuesta in encuestasFiltradas)
+                            {
+                                <tr>
+                                    <td>@encuesta.EncuestaId</td>
+                                    <td>@encuesta.Fecha.ToShortDateString()</td>
+                                    <td>@encuesta.Asignatura</td>
+                                    <td>@encuesta.Monto.ToString("C")</td>
+                                    <td>
+                                        <a href="/Encuestas/EditEncuestas/@encuesta.EncuestaId" class="btn btn-outline-primary bi bi-pencil-square"></a>
+                                    </td>
+                                    <td>
+                                        <a href="/Encuestas/DeleteEncuestas/@encuesta.EncuestaId" class="btn btn-outline-danger bi bi-trash"></a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
         </div>
+
+       
         <div class="card-footer">
-            <a href="/Encuestas/CreateEncuestas" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
+            <div class="row">
+                <div class="col text-start">
+                    <strong>Número de Encuestas:</strong> @NumeroEncuestas
+                </div>
+                <div class="col text-end">
+                    <strong>Monto Total:</strong> @MontoAcumulado.ToString("C")
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a href="/Encuestas/CreateEncuestas" class="btn btn-primary">
+                    <span class="bi bi-plus-square"></span> Crear Nueva Encuesta
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
-
-
-
-
-
-
 @code {
-
     public List<Encuestas> encuestas { get; set; } = new List<Encuestas>();
+    public List<Encuestas> encuestasFiltradas { get; set; } = new List<Encuestas>();
+
+    public string MetodoBusqueda { get; set; } = "ID";
+    public int BusquedaId { get; set; }
+    public string BusquedaAsignatura { get; set; } = string.Empty;
+    public DateTime? FechaInicio { get; set; }
+    public DateTime? FechaFin { get; set; }
+
+    public int NumeroEncuestas { get; set; } = 0;
+    public double MontoAcumulado { get; set; } = 0;
 
     protected override async Task OnInitializedAsync()
     {
         encuestas = await encuestasservices.Listar(e => e.EncuestaId > 0);
+        encuestasFiltradas = new List<Encuestas>(encuestas);
+        CalcularResumen();
     }
 
+    private void CalcularResumen()
+    {
+        NumeroEncuestas = encuestasFiltradas.Count;
+        MontoAcumulado = encuestasFiltradas.Sum(e => e.Monto);
+    }
+
+    private void FiltrarEncuestas()
+    {
+        encuestasFiltradas = encuestas
+            .Where(e =>
+                (MetodoBusqueda == "ID" && (BusquedaId == 0 || e.EncuestaId == BusquedaId)) ||
+                (MetodoBusqueda == "Asignatura" && (string.IsNullOrWhiteSpace(BusquedaAsignatura) || e.Asignatura.Contains(BusquedaAsignatura, StringComparison.OrdinalIgnoreCase)))
+            )
+            .Where(e =>
+                (!FechaInicio.HasValue || e.Fecha >= FechaInicio.Value) &&
+                (!FechaFin.HasValue || e.Fecha <= FechaFin.Value)
+            )
+            .ToList();
+
+        CalcularResumen();
+    }
+
+    private void RestablecerFiltros()
+    {
+        BusquedaId = 0;
+        BusquedaAsignatura = string.Empty;
+        FechaInicio = null;
+        FechaFin = null;
+        MetodoBusqueda = "ID";
+        encuestasFiltradas = new List<Encuestas>(encuestas);
+        CalcularResumen();
+    }
 }

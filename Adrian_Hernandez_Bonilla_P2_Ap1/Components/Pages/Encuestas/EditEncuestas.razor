@@ -1,10 +1,10 @@
-﻿@page "/Encuestas/CreateEncuestas"
+﻿@page "/Encuestas/EditEncuestas/{EncuestaId:int}"
 @rendermode InteractiveServer
 @inject EncuestasServices encuestasService
 @inject CiudadesServices ciudadesService
 @inject NavigationManager navigation
 
-<PageTitle>Agregar Encuesta</PageTitle>
+<PageTitle>Editar Encuesta</PageTitle>
 
 <EditForm Model="Encuesta" OnValidSubmit="Guardar">
     <DataAnnotationsValidator />
@@ -13,23 +13,24 @@
     <div class="container">
         <div class="card shadow-lg">
             <div class="card-header text-center">
-                <h5 class="card-title">Crear Encuesta</h5>
+                <h5 class="card-title">Editar Encuesta</h5>
             </div>
 
             <div class="card-body">
-
-             
+                @* Fecha *@
                 <div class="mb-3">
                     <label for="Fecha" class="form-label"><strong>Fecha</strong></label>
                     <InputDate class="form-control" @bind-Value="Encuesta.Fecha"></InputDate>
                 </div>
 
+                @* Asignatura *@
                 <div class="mb-3">
                     <label for="Asignatura" class="form-label"><strong>Asignatura</strong></label>
                     <InputText class="form-control" @bind-Value="Encuesta.Asignatura"></InputText>
                     <ValidationMessage For="(() => Encuesta.Asignatura)" />
                 </div>
 
+                @* Detalles de la Encuesta *@
                 <div class="border border-success p-3 mt-3">
                     <h4>Detalles de Ciudades</h4>
                     @if (!string.IsNullOrEmpty(DetalleMensaje))
@@ -59,7 +60,7 @@
                         <table class="table table-light">
                             <thead class="table-striped">
                                 <tr class="text-center">
-                                    <th>Nombre Ciudad</th>
+                                    <th>Ciudad</th>
                                     <th>Monto</th>
                                     <th>Remover</th>
                                 </tr>
@@ -69,7 +70,6 @@
                                 {
                                     var ciudad = Ciudades.FirstOrDefault(c => c.CiudadId == detalle.CiudadId);
                                     <tr class="text-center">
-                                        <td>@detalle.CiudadId</td>
                                         <td>@(ciudad != null ? ciudad.NombreCiudad : "Desconocido")</td>
                                         <td>@detalle.Monto.ToString("C")</td>
                                         <td>
@@ -90,13 +90,16 @@
 
             <div class="card-footer text-center mt-2">
                 <a href="/Encuestas/IndexEncuestas" class="btn btn-outline-primary bi bi-arrow-left mt-3">Volver</a>
-                <button type="submit" class="btn btn-outline-success bi bi-floppy mt-3">Guardar</button>
+                <button type="submit" class="btn btn-outline-success bi bi-floppy mt-3">Guardar Cambios</button>
             </div>
         </div>
     </div>
 </EditForm>
 
 @code {
+    [Parameter]
+    public int EncuestaId { get; set; }
+
     public Encuestas Encuesta { get; set; } = new Encuestas();
     public EncuestasDetalle Detalle { get; set; } = new EncuestasDetalle();
     public List<Ciudades> Ciudades { get; set; } = new List<Ciudades>();
@@ -105,7 +108,19 @@
     protected override async Task OnInitializedAsync()
     {
         Ciudades = await ciudadesService.Listar(c => c.CiudadId > 0);
-        Encuesta.Fecha = DateTime.Now;
+
+        if (EncuestaId > 0)
+        {
+            Encuesta = await encuestasService.Buscar(EncuestaId);
+            if (Encuesta == null)
+            {
+                navigation.NavigateTo("/Encuestas/IndexEncuestas");
+            }
+        }
+        else
+        {
+            Encuesta.Fecha = DateTime.Now;
+        }
     }
 
     private async Task AgregarDetalle()
