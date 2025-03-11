@@ -132,7 +132,7 @@
                 }
 
                 Encuesta.Monto = Encuesta.encuestasDetalle.Sum(d => d.Monto);
-                Detalle = new EncuestasDetalle(); // Reiniciar el detalle
+                Detalle = new EncuestasDetalle();
                 DetalleMensaje = string.Empty;
             }
             else
@@ -164,7 +164,7 @@
         if (guardado)
         {
             await Task.Delay(2000);
-            navigation.NavigateTo("/IndexEncuestas");
+            navigation.NavigateTo("/Encuestas/IndexEncuestas");
         }
         else
         {
