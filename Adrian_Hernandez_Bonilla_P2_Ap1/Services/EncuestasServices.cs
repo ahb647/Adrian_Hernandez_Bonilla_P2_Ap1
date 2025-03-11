@@ -15,12 +15,12 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
         private async Task<bool> Insertar(Encuestas encuestas)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
-            await AfectarCiudad(encuestas.encuestasDetalle.ToArray(), true); 
+            await AfectarCiudad(encuestas.encuestasDetalle.ToArray()); // ✅ Siempre suma el monto
             contexto.Encuestas.Add(encuestas);
             return await contexto.SaveChangesAsync() > 0;
         }
 
-        private async Task AfectarCiudad(EncuestasDetalle[] detalles, bool resta = true)
+        private async Task AfectarCiudad(EncuestasDetalle[] detalles)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
 
@@ -29,10 +29,7 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
                 var ciudad = await contexto.ciudades.SingleOrDefaultAsync(c => c.CiudadId == detalle.CiudadId);
                 if (ciudad != null)
                 {
-                    if (resta)
-                        ciudad.Monto -= detalle.Monto; 
-                    else
-                        ciudad.Monto += detalle.Monto;  
+                    ciudad.Monto += detalle.Monto; // ✅ Siempre suma el monto
                 }
             }
 
@@ -50,8 +47,9 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
             if (encuestaOriginal == null)
                 return false;
 
-            await AfectarCiudad(encuestaOriginal.encuestasDetalle.ToArray(), false); 
+            // Eliminamos la lógica que restaba los montos
 
+            // Eliminar detalles que ya no existen en la nueva lista
             foreach (var detalleOriginal in encuestaOriginal.encuestasDetalle)
             {
                 if (!encuestas.encuestasDetalle.Any(d => d.DetalleId == detalleOriginal.DetalleId))
@@ -60,10 +58,13 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
                 }
             }
 
-            await AfectarCiudad(encuestas.encuestasDetalle.ToArray(), true); 
+            // ✅ Siempre suma los montos de los nuevos detalles
+            await AfectarCiudad(encuestas.encuestasDetalle.ToArray());
 
+            // Actualizar encuesta
             contexto.Entry(encuestaOriginal).CurrentValues.SetValues(encuestas);
 
+            // Actualizar detalles
             foreach (var detalle in encuestas.encuestasDetalle)
             {
                 var detalleExistente = encuestaOriginal.encuestasDetalle
@@ -100,16 +101,16 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
             if (encuesta == null)
                 return false;
 
-            await AfectarCiudad(encuesta.encuestasDetalle.ToArray(), false); // Revertir cambios en ciudades
+            // Eliminamos la lógica que restaba los montos
 
             contexto.EncuestasDetalle.RemoveRange(encuesta.encuestasDetalle);
             contexto.Encuestas.Remove(encuesta);
 
             var cantidad = await contexto.SaveChangesAsync();
-            return cantidad > 0;    
+            return cantidad > 0;
         }
 
-        public async Task<Encuestas> Buscar(int EncuestaId)
+        public async Task<Encuestas?> Buscar(int EncuestaId)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
             return await contexto.Encuestas
@@ -118,7 +119,7 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
                 .FirstOrDefaultAsync(e => e.EncuestaId == EncuestaId);
         }
 
-        public async Task<Encuestas> BuscarConDetalle(int EncuestaId)
+        public async Task<Encuestas?> BuscarConDetalle(int EncuestaId)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
             return await contexto.Encuestas
