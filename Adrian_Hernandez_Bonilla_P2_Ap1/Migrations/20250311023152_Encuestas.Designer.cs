@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Adrian_Hernandez_Bonilla_P2_Ap1.Migrations
 {
     [DbContext(typeof(Contexto))]
-    [Migration("20250310232542_Encuestas")]
+    [Migration("20250311023152_Encuestas")]
     partial class Encuestas
     {
         /// <inheritdoc />
