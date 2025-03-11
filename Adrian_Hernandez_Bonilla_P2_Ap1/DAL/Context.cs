@@ -9,6 +9,10 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Context
         public Contexto(DbContextOptions<Contexto> options) : base(options) { }
 
         public DbSet<Ciudades> ciudades { get; set; }
+        public DbSet<Encuestas> Encuestas { get; set; }
+        public DbSet<EncuestasDetalle> EncuestasDetalle { get; set; }
+
+
 
 
 
