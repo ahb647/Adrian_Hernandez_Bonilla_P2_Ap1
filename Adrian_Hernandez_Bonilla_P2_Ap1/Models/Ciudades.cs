@@ -8,8 +8,6 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Models
         public int CiudadId { get; set; }
        
         public string NombreCiudad { get; set; } 
-
-
         public double Monto { get; set; }   
 
     }
