@@ -17,19 +17,20 @@
             </div>
 
             <div class="card-body">
-
-             
+                @* Fecha *@
                 <div class="mb-3">
                     <label for="Fecha" class="form-label"><strong>Fecha</strong></label>
                     <InputDate class="form-control" @bind-Value="Encuesta.Fecha"></InputDate>
                 </div>
 
+                @* Asignatura *@
                 <div class="mb-3">
                     <label for="Asignatura" class="form-label"><strong>Asignatura</strong></label>
                     <InputText class="form-control" @bind-Value="Encuesta.Asignatura"></InputText>
                     <ValidationMessage For="(() => Encuesta.Asignatura)" />
                 </div>
 
+                @* Detalles de la Encuesta *@
                 <div class="border border-success p-3 mt-3">
                     <h4>Detalles de Ciudades</h4>
                     @if (!string.IsNullOrEmpty(DetalleMensaje))
@@ -38,28 +39,31 @@
                             @DetalleMensaje
                         </div>
                     }
+
+                    @* Selector de Ciudad y Monto *@
                     <div class="row">
                         <div class="col-auto input-group align-items-center">
                             <InputSelect class="form-select" @bind-Value="Detalle.CiudadId">
-                                <option disabled value="0">--- Seleccione un ID de Ciudad ---</option>
+                                <option disabled value="0">--- Seleccione una Ciudad ---</option>
                                 @foreach (var ciudad in Ciudades)
                                 {
-                                    <option value="@ciudad.CiudadId">@ciudad.CiudadId</option>
+                                    <option value="@ciudad.CiudadId">@ciudad.NombreCiudad</option>
                                 }
                             </InputSelect>
 
                             <label class="col-form-label input-group-text">Monto</label>
                             <InputNumber class="form-control" @bind-Value="Detalle.Monto" placeholder="0.00"></InputNumber>
 
-                            <button type="button" class="btn btn-success bi bi-floppy" @onclick="AgregarDetalle">Agregar detalle</button>
+                            <button type="button" class="btn btn-success bi bi-plus-lg" @onclick="AgregarDetalle">Agregar</button>
                         </div>
                     </div>
 
+                    @* Tabla de Detalles *@
                     <div>
-                        <table class="table table-light">
+                        <table class="table table-light mt-3">
                             <thead class="table-striped">
                                 <tr class="text-center">
-                                    <th>Nombre Ciudad</th>
+                                    <th>Ciudad</th>
                                     <th>Monto</th>
                                     <th>Remover</th>
                                 </tr>
@@ -69,11 +73,10 @@
                                 {
                                     var ciudad = Ciudades.FirstOrDefault(c => c.CiudadId == detalle.CiudadId);
                                     <tr class="text-center">
-                                        <td>@detalle.CiudadId</td>
                                         <td>@(ciudad != null ? ciudad.NombreCiudad : "Desconocido")</td>
                                         <td>@detalle.Monto.ToString("C")</td>
                                         <td>
-                                            <button type="button" @onclick="() => RemoverDetalle(detalle)" class="btn btn-outline-danger bi bi-trash">Remover</button>
+                                            <button type="button" @onclick="() => RemoverDetalle(detalle)" class="btn btn-outline-danger bi bi-trash"></button>
                                         </td>
                                     </tr>
                                 }
@@ -89,8 +92,8 @@
             </div>
 
             <div class="card-footer text-center mt-2">
-                <a href="/Encuestas/IndexEncuestas" class="btn btn-outline-primary bi bi-arrow-left mt-3">Volver</a>
-                <button type="submit" class="btn btn-outline-success bi bi-floppy mt-3">Guardar</button>
+                <a href="/Encuestas/IndexEncuestas" class="btn btn-outline-primary bi bi-arrow-left mt-3"> Volver</a>
+                <button type="submit" class="btn btn-outline-success bi bi-floppy mt-3"> Guardar</button>
             </div>
         </div>
     </div>
@@ -116,11 +119,7 @@
             if (ciudadSeleccionada != null)
             {
                 var detalleExistente = Encuesta.encuestasDetalle.FirstOrDefault(d => d.CiudadId == Detalle.CiudadId);
-                if (detalleExistente != null)
-                {
-                    detalleExistente.Monto += Detalle.Monto;
-                }
-                else
+                if (detalleExistente == null)
                 {
                     Encuesta.encuestasDetalle.Add(new EncuestasDetalle
                         {
@@ -128,8 +127,12 @@
                             Monto = Detalle.Monto,
                         });
                 }
+                else
+                {
+                    detalleExistente.Monto += Detalle.Monto;
+                }
 
-                Encuesta.Monto = Encuesta.encuestasDetalle.Sum(d => d.Monto);
+                ActualizarMontoTotal();
                 Detalle = new EncuestasDetalle(); // Reiniciar el detalle
                 DetalleMensaje = string.Empty;
             }
@@ -140,7 +143,7 @@
         }
         else
         {
-            DetalleMensaje = "Debe seleccionar un ID de ciudad y un monto válido.";
+            DetalleMensaje = "Debe seleccionar una Ciudad y un monto válido.";
         }
     }
 
@@ -170,9 +173,14 @@
         }
     }
 
-    public async void RemoverDetalle(EncuestasDetalle detalle)
+    public void RemoverDetalle(EncuestasDetalle detalle)
     {
         Encuesta.encuestasDetalle.Remove(detalle);
+        ActualizarMontoTotal();
+    }
+
+    private void ActualizarMontoTotal()
+    {
         Encuesta.Monto = Encuesta.encuestasDetalle.Sum(d => d.Monto);
     }
 }
