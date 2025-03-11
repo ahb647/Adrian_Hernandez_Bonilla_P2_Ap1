@@ -15,32 +15,28 @@
         <div class="card-body">
             @if (Encuesta == null)
             {
-                <div class="alert alert-warning" role="alert">
+                <div class="alert alert-warning text-center" role="alert">
                     Cargando encuesta...
                 </div>
             }
             else
             {
-               
                 <div class="mb-3">
                     <label for="Fecha" class="form-label"><strong>Fecha</strong></label>
-                    <InputDate class="form-control" @bind-Value="Encuesta.Fecha" readonly></InputDate>
+                    <InputDate class="form-control" @bind-Value="Encuesta.Fecha" disabled></InputDate>
                 </div>
 
-              
                 <div class="mb-3">
                     <label for="Asignatura" class="form-label"><strong>Asignatura</strong></label>
-                    <InputText class="form-control" @bind-Value="Encuesta.Asignatura" readonly></InputText>
+                    <InputText class="form-control" @bind-Value="Encuesta.Asignatura" disabled></InputText>
                 </div>
 
-              
                 <div class="mb-3">
-                    <label for="Monto" class="form-label"><strong>Monto</strong></label>
-                    <InputNumber class="form-control" @bind-Value="Encuesta.Monto" readonly></InputNumber>
+                    <label for="Monto" class="form-label"><strong>Monto Total</strong></label>
+                    <InputNumber class="form-control" @bind-Value="Encuesta.Monto" disabled></InputNumber>
                 </div>
 
-               
-                <div class="border border-success p-3 mt-3">
+                <div class="border border-danger p-3 mt-3">
                     <h4>Detalles de Ciudades</h4>
                     <div>
                         <table class="table table-light">
@@ -53,8 +49,9 @@
                             <tbody>
                                 @foreach (var detalle in Encuesta.encuestasDetalle)
                                 {
+                                    var ciudad = Ciudades.FirstOrDefault(c => c.CiudadId == detalle.CiudadId);
                                     <tr class="text-center">
-                                        <td>@detalle.CiudadId</td>
+                                        <td>@(ciudad != null ? ciudad.NombreCiudad : "Desconocido")</td>
                                         <td>@detalle.Monto.ToString("C")</td>
                                     </tr>
                                 }
@@ -62,6 +59,13 @@
                         </table>
                     </div>
                 </div>
+
+                @if (!string.IsNullOrEmpty(MensajeError))
+                {
+                    <div class="alert alert-danger text-center mt-3" role="alert">
+                        @MensajeError
+                    </div>
+                }
             }
         </div>
 
@@ -77,14 +81,16 @@
     public int EncuestaId { get; set; }
 
     public Encuestas Encuesta { get; set; } = new Encuestas();
+    public List<Ciudades> Ciudades { get; set; } = new List<Ciudades>();
     public string MensajeError { get; set; } = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
         if (EncuestaId > 0)
         {
-          
             Encuesta = await encuestasService.Buscar(EncuestaId);
+            Ciudades = await ciudadesService.Listar(c => c.CiudadId > 0);
+
             if (Encuesta == null)
             {
                 navigation.NavigateTo("/Encuestas/IndexEncuestas");
