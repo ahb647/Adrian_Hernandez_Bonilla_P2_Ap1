@@ -23,7 +23,9 @@ builder.Services.AddDbContextFactory<Contexto>(options =>
 
 
 builder.Services.AddSingleton<ToastService>();
-builder.Services.AddScoped<ModeloServices>();
+builder.Services.AddScoped<CiudadesServices>();
+builder.Services.AddScoped<EncuestasServices>();
+builder.Services.AddScoped<EncuestasDetalleService>();
 builder.Services.AddBlazorBootstrap();
 
 

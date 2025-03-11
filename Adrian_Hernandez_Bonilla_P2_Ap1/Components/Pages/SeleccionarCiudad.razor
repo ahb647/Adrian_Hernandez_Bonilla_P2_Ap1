@@ -1,0 +1,59 @@
+﻿<div class="col-auto input-group align-items-center">
+    <InputSelect class="form-select" @bind-Value="CiudadId">
+        <option disabled value="0">--- Seleccione una Ciudad ---</option>
+        @foreach (var ciudad in Ciudades)
+        {
+            <option value="@ciudad.CiudadId">@ciudad.CiudadId -- @ciudad.NombreCiudad</option>
+        }
+    </InputSelect>
+
+    <label class="col-form-label input-group-text">Monto</label>
+    <InputNumber class="form-control" @bind-Value="Monto" placeholder="0.00"></InputNumber>
+
+    <button type="button" class="btn btn-success bi bi-floppy" @onclick="ElegirCiudad">Agregar detalle</button>
+</div>
+
+@if (!string.IsNullOrEmpty(MensajeError))
+{
+    <div class="alert alert-danger">@MensajeError</div>
+}
+
+@code {
+    [Parameter]
+    public List<Ciudades> Ciudades { get; set; } = new List<Ciudades>();
+
+    [Parameter]
+    public double Monto { get; set; }
+
+    [Parameter]
+    public int CiudadId { get; set; }
+
+    [Parameter]
+    public EventCallback<(Ciudades ciudad, double Monto)> CiudadSeleccionada { get; set; }
+
+    public string? MensajeError { get; set; }
+
+    private async Task ElegirCiudad()
+    {
+        MensajeError = null;
+
+        if (CiudadId > 0 && Monto > 0)
+        {
+            var CiudadElegida = Ciudades.SingleOrDefault(c => c.CiudadId == CiudadId);
+
+            if (CiudadElegida != null)
+            {
+                
+                await CiudadSeleccionada.InvokeAsync((CiudadElegida, Monto));
+            }
+            else
+            {
+                MensajeError = "Ciudad no encontrada";
+            }
+        }
+        else
+        {
+            MensajeError = "Debe seleccionar una ciudad y un monto válido";
+        }
+    }
+}
