@@ -1,4 +1,6 @@
-﻿<div class="col-auto input-group align-items-center">
+﻿@using Adrian_Hernandez_Bonilla_P2_Ap1.Models
+
+<div class="col-auto input-group align-items-center">
     <InputSelect class="form-select" @bind-Value="CiudadId">
         <option disabled value="0">--- Seleccione una Ciudad ---</option>
         @foreach (var ciudad in Ciudades)
@@ -20,8 +22,7 @@
 
 @code {
     [Parameter]
-    public List<Ciudades> Ciudades { get; set; } = new List<Ciudades>();
-
+    public List<Adrian_Hernandez_Bonilla_P2_Ap1.Models.Ciudades> Ciudades { get; set; } = new();
     [Parameter]
     public double Monto { get; set; }
 
@@ -29,7 +30,8 @@
     public int CiudadId { get; set; }
 
     [Parameter]
-    public EventCallback<(Ciudades ciudad, double Monto)> CiudadSeleccionada { get; set; }
+    public EventCallback<(Adrian_Hernandez_Bonilla_P2_Ap1.Models.Ciudades ciudad, double Monto)> CiudadSeleccionada { get; set; }
+
 
     public string? MensajeError { get; set; }
 
@@ -43,7 +45,6 @@
 
             if (CiudadElegida != null)
             {
-                
                 await CiudadSeleccionada.InvokeAsync((CiudadElegida, Monto));
             }
             else
