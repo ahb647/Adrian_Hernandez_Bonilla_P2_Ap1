@@ -3,9 +3,8 @@
 @inject NavigationManager navigationManager
 @rendermode InteractiveServer
 
+<PageTitle>Índice de Encuestas</PageTitle>
 
-
-<PageTitle></PageTitle>
 <div class="container">
     <div class="card shadow-lg">
         <div class="card-header">
@@ -13,7 +12,6 @@
         </div>
 
         <div class="card-body">
-
             <table class="table table-hover">
                 <thead class="text-center">
                     <tr>
@@ -26,47 +24,60 @@
                     </tr>
                 </thead>
                 <tbody class="text-center">
-                    @foreach (var encuestas in encuestas)
+                    @foreach (var encuesta in encuestas)
                     {
                         <tr>
-                            <td>@encuestas.EncuestaId</td>
-                            <td>@encuestas.Fecha</td>
-                            <td>@encuestas.Asignatura</td>
-                            <td>@encuestas.Monto</td>
-                            
-
+                            <td>@encuesta.EncuestaId</td>
+                            <td>@encuesta.Fecha.ToShortDateString()</td>
+                            <td>@encuesta.Asignatura</td>
+                            <td>@encuesta.Monto.ToString("C")</td>
                             <td class="text-center">
-                                <a href="Edit/@encuestas.EncuestaId" class="btn btn-outline-primary bi bi-pencil-square"></a>
+                                <a href="/Encuestas/EditEncuestas/@encuesta.EncuestaId" class="btn btn-outline-primary bi bi-pencil-square"></a>
                             </td>
-
                             <td class="text-center">
-                                <a href="Delete/@@encuestas.EncuestaId" class="btn btn-outline-danger bi bi-trash"></a>
+                                <a href="/Encuestas/DeleteEncuestas/@encuesta.EncuestaId" class="btn btn-outline-danger bi bi-trash"></a>
                             </td>
                         </tr>
-
                     }
                 </tbody>
             </table>
         </div>
+
+      
         <div class="card-footer">
-            <a href="/Encuestas/CreateEncuestas" class="btn btn-primary"> <span class="bi bi-plus-square mt-3"></span> Crear</a>
+            <div class="row">
+                <div class="col text-start">
+                    <strong>Número de Encuestas:</strong> @NumeroEncuestas
+                </div>
+                <div class="col text-end">
+                    <strong>Monto Acumulado:</strong> @MontoAcumulado.ToString("C")
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a href="/Encuestas/CreateEncuestas" class="btn btn-primary">
+                    <span class="bi bi-plus-square"></span> Crear
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
-
-
-
-
-
-
 @code {
-
     public List<Encuestas> encuestas { get; set; } = new List<Encuestas>();
+    public int NumeroEncuestas { get; set; } = 0;
+    public double MontoAcumulado { get; set; } = 0;
 
     protected override async Task OnInitializedAsync()
     {
         encuestas = await encuestasservices.Listar(e => e.EncuestaId > 0);
+        CalcularResumen();
     }
 
+    private void CalcularResumen()
+    {
+        NumeroEncuestas = encuestas.Count;
+
+       
+        MontoAcumulado = encuestas.Sum(e => e.Monto);
+    }
 }
