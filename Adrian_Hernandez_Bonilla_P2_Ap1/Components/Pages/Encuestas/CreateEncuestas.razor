@@ -18,27 +18,18 @@
 
             <div class="card-body">
 
-                @* Fecha *@
+             
                 <div class="mb-3">
                     <label for="Fecha" class="form-label"><strong>Fecha</strong></label>
                     <InputDate class="form-control" @bind-Value="Encuesta.Fecha"></InputDate>
                 </div>
 
-                @* Asignatura *@
                 <div class="mb-3">
                     <label for="Asignatura" class="form-label"><strong>Asignatura</strong></label>
                     <InputText class="form-control" @bind-Value="Encuesta.Asignatura"></InputText>
                     <ValidationMessage For="(() => Encuesta.Asignatura)" />
                 </div>
 
-                @* Monto *@
-                <div class="mb-3">
-                    <label for="Monto" class="form-label"><strong>Monto</strong></label>
-                    <InputNumber class="form-control" @bind-Value="Encuesta.Monto" readonly></InputNumber>
-                    <ValidationMessage For="(() => Encuesta.Monto)" />
-                </div>
-
-                @* Detalles de la Encuesta *@
                 <div class="border border-success p-3 mt-3">
                     <h4>Detalles de Ciudades</h4>
                     @if (!string.IsNullOrEmpty(DetalleMensaje))
@@ -50,10 +41,10 @@
                     <div class="row">
                         <div class="col-auto input-group align-items-center">
                             <InputSelect class="form-select" @bind-Value="Detalle.CiudadId">
-                                <option disabled value="0">--- Seleccione una Ciudad ---</option>
+                                <option disabled value="0">--- Seleccione un ID de Ciudad ---</option>
                                 @foreach (var ciudad in Ciudades)
                                 {
-                                    <option value="@ciudad.CiudadId">@ciudad.CiudadId -- @ciudad.NombreCiudad</option>
+                                    <option value="@ciudad.CiudadId">@ciudad.CiudadId</option>
                                 }
                             </InputSelect>
 
@@ -68,7 +59,7 @@
                         <table class="table table-light">
                             <thead class="table-striped">
                                 <tr class="text-center">
-                                    <th>Ciudad</th>
+                                    <th>Nombre Ciudad</th>
                                     <th>Monto</th>
                                     <th>Remover</th>
                                 </tr>
@@ -76,8 +67,10 @@
                             <tbody>
                                 @foreach (var detalle in Encuesta.encuestasDetalle)
                                 {
+                                    var ciudad = Ciudades.FirstOrDefault(c => c.CiudadId == detalle.CiudadId);
                                     <tr class="text-center">
                                         <td>@detalle.CiudadId</td>
+                                        <td>@(ciudad != null ? ciudad.NombreCiudad : "Desconocido")</td>
                                         <td>@detalle.Monto.ToString("C")</td>
                                         <td>
                                             <button type="button" @onclick="() => RemoverDetalle(detalle)" class="btn btn-outline-danger bi bi-trash">Remover</button>
@@ -86,6 +79,11 @@
                                 }
                             </tbody>
                         </table>
+
+                        <div class="d-flex justify-content-between mt-3">
+                            <strong class="text-start">Número de Detalles: @Encuesta.encuestasDetalle.Count</strong>
+                            <strong class="text-end">Monto Total Acumulado: @Encuesta.Monto.ToString("C")</strong>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -132,7 +130,7 @@
                 }
 
                 Encuesta.Monto = Encuesta.encuestasDetalle.Sum(d => d.Monto);
-                Detalle = new EncuestasDetalle();
+                Detalle = new EncuestasDetalle(); // Reiniciar el detalle
                 DetalleMensaje = string.Empty;
             }
             else
@@ -142,7 +140,7 @@
         }
         else
         {
-            DetalleMensaje = "Debe seleccionar una ciudad y un monto válido.";
+            DetalleMensaje = "Debe seleccionar un ID de ciudad y un monto válido.";
         }
     }
 
@@ -176,13 +174,5 @@
     {
         Encuesta.encuestasDetalle.Remove(detalle);
         Encuesta.Monto = Encuesta.encuestasDetalle.Sum(d => d.Monto);
-        Detalle.CiudadId = detalle.CiudadId;
-        Detalle.Monto = detalle.Monto;
-
-        var ciudad = await ciudadesService.Buscar(detalle.CiudadId);
-        if (ciudad != null)
-        {
-            ciudad.Monto -= detalle.Monto;
-        }
     }
 }
