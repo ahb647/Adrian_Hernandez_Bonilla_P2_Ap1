@@ -1,4 +1,5 @@
 ﻿@page "/Encuestas/DeleteEncuestas/{EncuestaId:int}"
+@using Microsoft.AspNetCore.Components.Forms
 @rendermode InteractiveServer
 @inject EncuestasServices encuestasService
 @inject CiudadesServices ciudadesService
@@ -108,7 +109,7 @@
         {
             foreach (var detalle in Encuesta.encuestasDetalle)
             {
-                await ciudadesService.RevertirAfectarCiudad(detalle);
+                await encuestasService.RevertirAfectarCiudad(new[] { detalle });
             }
 
             var eliminado = await encuestasService.Eliminar(EncuestaId);
