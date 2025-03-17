@@ -1,5 +1,4 @@
-﻿
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Adrian_Hernandez_Bonilla_P2_Ap1.Models;
 
@@ -60,6 +59,17 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
             return await contexto.ciudades
                 .Where(criterio)
                 .ToListAsync();
+        }
+
+        public async Task RevertirAfectarCiudad(EncuestasDetalle detalle)
+        {
+            await using var contexto = await _dbFactory.CreateDbContextAsync();
+            var ciudad = await contexto.ciudades.FirstOrDefaultAsync(c => c.CiudadId == detalle.CiudadId);
+            if (ciudad != null)
+            {
+                ciudad.Monto -= detalle.Monto;
+                await contexto.SaveChangesAsync();
+            }
         }
     }
 }

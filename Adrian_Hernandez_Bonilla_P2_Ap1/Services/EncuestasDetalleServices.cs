@@ -25,6 +25,7 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
             if (detalle != null)
             {
                 await AfectarMonto(detalle, false);
+                await RevertirAfectarCiudad(detalle);
                 contexto.EncuestasDetalle.Remove(detalle);
                 await contexto.SaveChangesAsync();
                 return true;
@@ -49,6 +50,17 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
                     encuesta.Monto += detalle.Monto;
                 }
 
+                await contexto.SaveChangesAsync();
+            }
+        }
+
+        public async Task RevertirAfectarCiudad(EncuestasDetalle detalle)
+        {
+            await using var contexto = await DbFactory.CreateDbContextAsync();
+            var ciudad = await contexto.ciudades.SingleOrDefaultAsync(c => c.CiudadId == detalle.CiudadId);
+            if (ciudad != null)
+            {
+                ciudad.Monto -= detalle.Monto;
                 await contexto.SaveChangesAsync();
             }
         }

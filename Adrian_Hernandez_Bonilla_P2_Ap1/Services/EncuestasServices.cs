@@ -15,7 +15,7 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
         private async Task<bool> Insertar(Encuestas encuestas)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
-            await AfectarCiudad(encuestas.encuestasDetalle.ToArray()); // ✅ Siempre suma el monto
+            await AfectarCiudad(encuestas.encuestasDetalle.ToArray());
             contexto.Encuestas.Add(encuestas);
             return await contexto.SaveChangesAsync() > 0;
         }
@@ -29,7 +29,23 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
                 var ciudad = await contexto.ciudades.SingleOrDefaultAsync(c => c.CiudadId == detalle.CiudadId);
                 if (ciudad != null)
                 {
-                    ciudad.Monto += detalle.Monto; // ✅ Siempre suma el monto
+                    ciudad.Monto += detalle.Monto;
+                }
+            }
+
+            await contexto.SaveChangesAsync();
+        }
+
+        private async Task RevertirAfectarCiudad(EncuestasDetalle[] detalles)
+        {
+            await using var contexto = await DbFactory.CreateDbContextAsync();
+
+            foreach (var detalle in detalles)
+            {
+                var ciudad = await contexto.ciudades.SingleOrDefaultAsync(c => c.CiudadId == detalle.CiudadId);
+                if (ciudad != null)
+                {
+                    ciudad.Monto -= detalle.Monto;
                 }
             }
 
@@ -47,9 +63,8 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
             if (encuestaOriginal == null)
                 return false;
 
-            // Eliminamos la lógica que restaba los montos
+            await RevertirAfectarCiudad(encuestaOriginal.encuestasDetalle.ToArray());
 
-            // Eliminar detalles que ya no existen en la nueva lista
             foreach (var detalleOriginal in encuestaOriginal.encuestasDetalle)
             {
                 if (!encuestas.encuestasDetalle.Any(d => d.DetalleId == detalleOriginal.DetalleId))
@@ -58,13 +73,10 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
                 }
             }
 
-            // ✅ Siempre suma los montos de los nuevos detalles
             await AfectarCiudad(encuestas.encuestasDetalle.ToArray());
 
-            // Actualizar encuesta
             contexto.Entry(encuestaOriginal).CurrentValues.SetValues(encuestas);
 
-            // Actualizar detalles
             foreach (var detalle in encuestas.encuestasDetalle)
             {
                 var detalleExistente = encuestaOriginal.encuestasDetalle
@@ -101,7 +113,7 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
             if (encuesta == null)
                 return false;
 
-            // Eliminamos la lógica que restaba los montos
+            await RevertirAfectarCiudad(encuesta.encuestasDetalle.ToArray());
 
             contexto.EncuestasDetalle.RemoveRange(encuesta.encuestasDetalle);
             contexto.Encuestas.Remove(encuesta);
