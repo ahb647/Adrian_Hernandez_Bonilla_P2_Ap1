@@ -17,20 +17,20 @@
             </div>
 
             <div class="card-body">
-                @* Fecha *@
+                
                 <div class="mb-3">
                     <label for="Fecha" class="form-label"><strong>Fecha</strong></label>
                     <InputDate class="form-control" @bind-Value="Encuesta.Fecha"></InputDate>
                 </div>
 
-                @* Asignatura *@
+                
                 <div class="mb-3">
                     <label for="Asignatura" class="form-label"><strong>Asignatura</strong></label>
                     <InputText class="form-control" @bind-Value="Encuesta.Asignatura"></InputText>
                     <ValidationMessage For="(() => Encuesta.Asignatura)" />
                 </div>
 
-                @* Detalles de la Encuesta *@
+                
                 <div class="border border-success p-3 mt-3">
                     <h4>Detalles de Ciudades</h4>
                     @if (!string.IsNullOrEmpty(DetalleMensaje))
@@ -40,7 +40,7 @@
                         </div>
                     }
 
-                    @* Selector de Ciudad y Monto *@
+                   
                     <div class="row">
                         <div class="col-auto input-group align-items-center">
                             <InputSelect class="form-select" @bind-Value="Detalle.CiudadId">
@@ -58,7 +58,7 @@
                         </div>
                     </div>
 
-                    @* Tabla de Detalles *@
+                    
                     <div>
                         <table class="table table-light mt-3">
                             <thead class="table-striped">
@@ -133,7 +133,7 @@
                 }
 
                 ActualizarMontoTotal();
-                Detalle = new EncuestasDetalle(); // Reiniciar el detalle
+                Detalle = new EncuestasDetalle();
                 DetalleMensaje = string.Empty;
             }
             else
