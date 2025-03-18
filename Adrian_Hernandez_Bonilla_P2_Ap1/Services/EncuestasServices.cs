@@ -36,7 +36,7 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
             await contexto.SaveChangesAsync();
         }
 
-        private async Task RevertirAfectarCiudad(EncuestasDetalle[] detalles)
+        public async Task RevertirAfectarCiudad(EncuestasDetalle[] detalles)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
 
@@ -45,14 +45,18 @@ namespace Adrian_Hernandez_Bonilla_P2_Ap1.Services
                 var ciudad = await contexto.ciudades.SingleOrDefaultAsync(c => c.CiudadId == detalle.CiudadId);
                 if (ciudad != null)
                 {
-                    ciudad.Monto -= detalle.Monto;
+                  
+                    var montoRestante = await contexto.EncuestasDetalle
+                        .Where(d => d.CiudadId == detalle.CiudadId && !detalles.Contains(d))
+                        .SumAsync(d => d.Monto);
+
+                    ciudad.Monto = montoRestante; 
                 }
             }
 
             await contexto.SaveChangesAsync();
         }
-
-        private async Task<bool> Modificar(Encuestas encuestas)
+        public async Task<bool> Modificar(Encuestas encuestas)
         {
             await using var contexto = await DbFactory.CreateDbContextAsync();
 

@@ -6,6 +6,7 @@ global using Adrian_Hernandez_Bonilla_P2_Ap1.Services;
 using Adrian_Hernandez_Bonilla_P2_Ap1.Components;
 
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -27,23 +28,6 @@ builder.Services.AddScoped<CiudadesServices>();
 builder.Services.AddScoped<EncuestasServices>();
 builder.Services.AddScoped<EncuestasDetalleService>();
 builder.Services.AddBlazorBootstrap();
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 var app = builder.Build();
